@@ -66,7 +66,7 @@ jobs:
       actions: write
     steps:
       - name: Read Dependabot metadata
-        uses: dependabot/fetch-metadata@v2
+        uses: dependabot/fetch-metadata@v3
       - name: Merge bump after the gate passes
         run: |
           for attempt in 1 2 3; do
