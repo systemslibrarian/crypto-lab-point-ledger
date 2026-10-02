@@ -8,14 +8,14 @@ export default defineConfig({
   timeout: 90000,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:4679/crypto-lab-point-ledger/',
+    baseURL: 'http://localhost:4719/crypto-lab-point-ledger/',
     viewport: { width: 1280, height: 900 },
     colorScheme: 'dark',
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: 'npm run build && npm run preview -- --port 4679 --strictPort',
-    url: 'http://localhost:4679/crypto-lab-point-ledger/',
+    command: 'npm run build && npm run preview -- --port 4719 --strictPort',
+    url: 'http://localhost:4719/crypto-lab-point-ledger/',
     reuseExistingServer: false,
     timeout: 120000,
   },
