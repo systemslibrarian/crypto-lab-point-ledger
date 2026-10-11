@@ -5,6 +5,26 @@ const numberOnPage = async (page: Page, id: string) => Number((await page.getByT
 
 test.beforeEach(async ({ page }) => { await boot(page); });
 
+test('repository navigation stays visible and keyboard accessible after the icon upgrade', async ({ page }) => {
+  const navigation = page.getByRole('navigation', { name: 'Crypto Lab navigation' });
+  const source = navigation.getByRole('link', { name: 'View this project on GitHub' });
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 380, height: 844 }, { width: 320, height: 700 }]) {
+    await page.setViewportSize(viewport);
+    await expect(source).toBeVisible();
+    await expect(source).toHaveAttribute('href', 'https://github.com/systemslibrarian/crypto-lab-point-ledger');
+    await expect(source).toHaveAttribute('target', '_blank');
+    await expect(source).toHaveAttribute('rel', 'noreferrer');
+    await expect(source).toContainText('GitHub');
+    await expect(source.locator('svg')).toHaveAttribute('width', '15');
+    await expect(source.locator('svg')).toHaveAttribute('height', '15');
+    await expect(source.locator('svg')).toHaveAttribute('aria-hidden', 'true');
+    await navigation.getByRole('link', { name: 'Crypto Lab menu' }).focus();
+    await page.keyboard.press('Tab');
+    await expect(source).toBeFocused();
+    await expectNoHorizontalOverflow(page, `repository navigation ${viewport.width}`);
+  }
+});
+
 test('ledger: parts sum to A1; headline, A1 and Figure 6 paths remain distinct', async ({ page }) => {
   const perAddition = await numberOnPage(page, 'addition-toffoli');
   const lookup = await numberOnPage(page, 'lookup-toffoli');

@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { useState } from 'react';
-import { BookOpen, Github, Menu } from 'lucide-react';
+import { BookOpen, CodeXml, Menu } from 'lucide-react';
 import '@fontsource/ibm-plex-sans/latin-400.css';
 import '@fontsource/ibm-plex-sans/latin-500.css';
 import '@fontsource/ibm-plex-sans/latin-600.css';
@@ -13,7 +13,7 @@ import { FuzzView } from './ui/fuzz-view';
 import { ProofView } from './ui/proof-view';
 
 function Topbar() {
-  return <><a className="cl-skip-link" href="#app">Skip to content</a><header className="cl-topbar" role="banner" aria-label="Crypto Lab"><a className="cl-brand" href="https://crypto-lab.systemslibrarian.dev/" aria-label="Crypto Lab home"><span className="cl-badge">CL</span><span className="cl-brand-text"><span className="cl-title">CRYPTO LAB</span><span className="cl-sub">systemslibrarian.dev</span></span></a><nav className="cl-actions" aria-label="Crypto Lab navigation"><a className="cl-btn" href="https://crypto-lab.systemslibrarian.dev/" aria-label="Crypto Lab menu"><Menu size={15} aria-hidden="true" /><span>Menu</span></a><a className="cl-btn" href="https://github.com/systemslibrarian/crypto-lab-point-ledger" target="_blank" rel="noreferrer" aria-label="View this project on GitHub"><Github size={15} aria-hidden="true" /><span>GitHub</span></a></nav></header></>;
+  return <><a className="cl-skip-link" href="#app">Skip to content</a><header className="cl-topbar" role="banner" aria-label="Crypto Lab"><a className="cl-brand" href="https://crypto-lab.systemslibrarian.dev/" aria-label="Crypto Lab home"><span className="cl-badge">CL</span><span className="cl-brand-text"><span className="cl-title">CRYPTO LAB</span><span className="cl-sub">systemslibrarian.dev</span></span></a><nav className="cl-actions" aria-label="Crypto Lab navigation"><a className="cl-btn" href="https://crypto-lab.systemslibrarian.dev/" aria-label="Crypto Lab menu"><Menu size={15} aria-hidden="true" /><span>Menu</span></a><a className="cl-btn" href="https://github.com/systemslibrarian/crypto-lab-point-ledger" target="_blank" rel="noreferrer" aria-label="View this project on GitHub"><CodeXml size={15} aria-hidden="true" /><span>GitHub</span></a></nav></header></>;
 }
 
 function App() {
