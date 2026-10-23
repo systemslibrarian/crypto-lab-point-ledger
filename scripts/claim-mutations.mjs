@@ -71,7 +71,7 @@ const cases = [
     'src/dialog.ts',
     '  const result = folded >= prime ? folded - prime : folded;',
     '  const result = folded > prime ? folded - prime : folded;',
-    vitest('tests/dialog.spec.ts', 'handles the x + y = p boundary instead of silently skipping it'),
+    vitest('tests/dialog.spec.ts', 'handles the x'),
   ],
   [
     'dialog verdict ignores restoration of the input',
