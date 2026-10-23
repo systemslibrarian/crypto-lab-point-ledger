@@ -17,6 +17,9 @@ export function attackResources(toffoliPerAddition: number, qubitsPerAddition: n
 }
 
 export function clockMinutes(toffoli: number, primed = false) {
+  if (!Number.isFinite(toffoli) || toffoli < 0) {
+    throw new RangeError('The operation count must be finite and nonnegative.');
+  }
   return toffoli * parameters.toffoliMicroseconds * 1e-6 * parameters.overhead / 60 * (primed ? parameters.primedFactor : 1);
 }
 

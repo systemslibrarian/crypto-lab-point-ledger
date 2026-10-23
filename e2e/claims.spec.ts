@@ -122,6 +122,14 @@ test('ceiling: no point for unknown G; independent inversion checks known budget
   await expect(page.getByTestId('unknown-ceiling')).toContainText('no single certified ceiling');
 });
 
+test('ceiling: a draw count is an integer contract, not a fractional weight', async ({ page }) => {
+  await openAct(page, 2);
+  await page.getByLabel('The number of draws is unknown').uncheck();
+  await page.getByLabel('Draw bound G', { exact: true }).fill('1.5');
+  await expect(page.getByTestId('ceiling-result')).toHaveCount(0);
+  await expect(page.getByRole('status')).toContainText('positive integer');
+});
+
 test('grind: selected checks pass while all-input correctness remains unproved', async ({ page }) => {
   await openAct(page, 2);
   await page.getByLabel('Demo tests per draw').selectOption('4');

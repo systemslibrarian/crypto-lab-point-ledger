@@ -1,85 +1,38 @@
-name: Build, test, and deploy to Pages
+# Deploy the static Vite build to GitHub Pages.
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
-
-concurrency:
-  group: pages-${{ github.ref }}
-  cancel-in-progress: true
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  # Do not interrupt a main publication after it has started.
+  cancel-in-progress: false
 
 jobs:
+  # Pull requests and deployments call the same source-running gate. The gate
+  # receives read-only repository authority; Pages and OIDC write authority is
+  # isolated to the no-checkout deploy job below.
   build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-      - name: Install dependencies
-        run: npm ci
-      - name: Run unit tests
-        run: npm test
-      - name: Build production site
-        run: npm run build
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-      - name: Accessibility gate (axe-core, WCAG A/AA)
-        run: npm run test:a11y
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v6
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: dist
+    uses: ./.github/workflows/browser-gate.yml
+    with:
+      upload_pages_artifact: true
 
   deploy:
     needs: build
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
-
-  dependabot-auto-merge:
-    needs: build
-    if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      actions: write
-    steps:
-      - name: Read Dependabot metadata
-        uses: dependabot/fetch-metadata@v3
-      - name: Merge bump after the gate passes
-        run: |
-          for attempt in 1 2 3; do
-            gh pr merge --squash --delete-branch "$PR_URL" && merged=1 && break
-            sleep 15
-          done
-          [[ -n "$merged" ]] || { echo "::warning::gate passed, merge did not land"; exit 0; }
-          # A merge made with GITHUB_TOKEN raises no push event -- GitHub suppresses
-          # them so workflows cannot retrigger themselves -- so deploy would never run
-          # and the site would keep serving the previous build. Ask for it explicitly;
-          # a workflow_dispatch through the API is not suppressed. The dispatched run
-          # is the same gate-then-deploy pipeline, so a bad merge still ships nothing.
-          gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

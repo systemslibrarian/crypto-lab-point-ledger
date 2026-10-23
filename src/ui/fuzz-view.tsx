@@ -20,7 +20,7 @@ export function FuzzView() {
   const tests = Number(testCount);
   const draws = Number(drawBound);
   const confidence = Number(confidenceText) / 100;
-  const valid = Number.isSafeInteger(tests) && tests > 0 && tests <= 1000000 && confidence > 0 && confidence < 1 && Number.isFinite(confidence) && (unknownDraws || (Number.isFinite(draws) && draws >= 1));
+  const valid = Number.isSafeInteger(tests) && tests > 0 && tests <= 1000000 && confidence > 0 && confidence < 1 && Number.isFinite(confidence) && (unknownDraws || (Number.isSafeInteger(draws) && draws >= 1));
   const ceiling = valid && !unknownDraws ? failureCeiling(tests, draws, confidence) : null;
   const points = valid ? Array.from({ length: labDefaults.nonceBits + 1 }, (_, exponent) => [exponent, failureCeiling(tests, 2 ** exponent, confidence) * 100] as const) : [];
   const sourceLog = landabilityLog2(parameters.failureThreshold, parameters.tests);
