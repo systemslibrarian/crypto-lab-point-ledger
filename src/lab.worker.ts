@@ -1,5 +1,5 @@
 import { exactIterations, multiplyDialog } from './dialog';
-import { estimateFailures, randomField, runFuzzDraw, type FailureEstimate, type FuzzConfig } from './fuzz';
+import { estimateFailures, randomField, runFuzzDraw, validateFuzzConfig, type FailureEstimate, type FuzzConfig } from './fuzz';
 import { labDefaults } from './sources';
 
 export type WorkerRequest = { id: number; kind: 'measure' | 'grind'; config: FuzzConfig; count: number; maxDraws?: number };
@@ -38,6 +38,8 @@ function measure(request: WorkerRequest, count: number): Measurement {
 self.onmessage = (event: MessageEvent<WorkerRequest>) => {
   const request = event.data;
   try {
+    if (request.kind !== 'measure' && request.kind !== 'grind') throw new RangeError('Unknown worker request kind.');
+    validateFuzzConfig(request.config);
     if (!Number.isSafeInteger(request.count) || request.count < 1 || request.count > labDefaults.maximumSamples) throw new RangeError('Sample count is out of range.');
     if (request.kind === 'measure') {
       postMessage({ id: request.id, kind: 'measure', result: measure(request, request.count) } satisfies WorkerResponse);
