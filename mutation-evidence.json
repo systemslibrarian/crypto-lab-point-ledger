@@ -1,0 +1,102 @@
+[
+  {
+    "name": "full-run accounting uses one extra point addition",
+    "sourceDiff": "diff --git a/src/ledger.ts b/src/ledger.ts\nindex f8224bd..688f191 100644\n--- a/src/ledger.ts\n+++ b/src/ledger.ts\n@@ -4,7 +4,7 @@ export function attackResources(toffoliPerAddition: number, qubitsPerAddition: n\n   if (!Number.isFinite(toffoliPerAddition) || toffoliPerAddition < 0 || !Number.isFinite(qubitsPerAddition) || qubitsPerAddition < 0) {\n     throw new RangeError('Resource counts must be finite and nonnegative.');\n   }\n-  const additions = 2 * parameters.fieldBits / parameters.window - 4;\n+  const additions = 2 * parameters.fieldBits / parameters.window - 3;\n   const lookupPerAddition = 3 * 2 ** parameters.window;\n   return {\n     additions,\n",
+    "baseline": "d3bde73e1b6bc987ebad4b8c02004f15c9feecd43e32e6b3cb56bab14a544514",
+    "mutant": "abde3751c9d5bcc4c2037a9776186a609e93020bb342f0514da50bcf2d599c24",
+    "namedTest": "recomputes A1 and A2 for both statements",
+    "assertionFailure": true,
+    "retries": 0,
+    "restoredGreen": true
+  },
+  {
+    "name": "primed clock no longer halves the operation time",
+    "sourceDiff": "diff --git a/src/ledger.ts b/src/ledger.ts\nindex f8224bd..46b8156 100644\n--- a/src/ledger.ts\n+++ b/src/ledger.ts\n@@ -20,7 +20,7 @@ export function clockMinutes(toffoli: number, primed = false) {\n   if (!Number.isFinite(toffoli) || toffoli < 0) {\n     throw new RangeError('The operation count must be finite and nonnegative.');\n   }\n-  return toffoli * parameters.toffoliMicroseconds * 1e-6 * parameters.overhead / 60 * (primed ? parameters.primedFactor : 1);\n+  return toffoli * parameters.toffoliMicroseconds * 1e-6 * parameters.overhead / 60;\n }\n \n export function onSpendProbability(attackMinutes: number, blockMinutes: number) {\n",
+    "baseline": "d3bde73e1b6bc987ebad4b8c02004f15c9feecd43e32e6b3cb56bab14a544514",
+    "mutant": "9f9ee9b3ee7344737c2d419f5f29475ff678fe599c6cba7b7191881bb6b903c2",
+    "namedTest": "keeps headline and A1 clocks separate",
+    "assertionFailure": true,
+    "retries": 0,
+    "restoredGreen": true
+  },
+  {
+    "name": "exact-p reduction skips the equality boundary",
+    "sourceDiff": "diff --git a/src/dialog.ts b/src/dialog.ts\nindex 5d008dc..d73d648 100644\n--- a/src/dialog.ts\n+++ b/src/dialog.ts\n@@ -155,7 +155,7 @@ export function pseudoMersenneReduce(value: bigint, bits = parameters.fieldBits,\n   const carry = value / radix;\n   const low = value % radix;\n   const folded = low + carry * complement;\n-  const result = folded >= prime ? folded - prime : folded;\n+  const result = folded > prime ? folded - prime : folded;\n   return { carry, low, folded, result, sumEqualsPrime: value === prime };\n }\n \n",
+    "baseline": "d3bde73e1b6bc987ebad4b8c02004f15c9feecd43e32e6b3cb56bab14a544514",
+    "mutant": "08fcf0c6f8d924360d4fc0216b5806f6e7e75ead0a8a7b549a112b1b99667d22",
+    "namedTest": "handles the x",
+    "assertionFailure": true,
+    "retries": 0,
+    "restoredGreen": true
+  },
+  {
+    "name": "dialog verdict ignores restoration of the input",
+    "sourceDiff": "diff --git a/src/dialog.ts b/src/dialog.ts\nindex 5d008dc..f234404 100644\n--- a/src/dialog.ts\n+++ b/src/dialog.ts\n@@ -111,7 +111,7 @@ export function restoreEuclid(pairs: readonly Pair[], finalUpper: bigint, finalL\n }\n \n export function checkDialogResult(first: bigint, product: bigint, expected: bigint, restored: bigint, input: bigint, reason: string | null) {\n-  return reason === null && first === 0n && product === expected && restored === input;\n+  return reason === null && first === 0n && product === expected;\n }\n \n export function multiplyDialog(multiplier: bigint, multiplicand: bigint, options: DialogOptions = {}) {\n",
+    "baseline": "d3bde73e1b6bc987ebad4b8c02004f15c9feecd43e32e6b3cb56bab14a544514",
+    "mutant": "f8fb8d161e6f8baa23b772cc3b3c76448e107805928517885a624f1c6ea23b5a",
+    "namedTest": "does not call a mismatched output a pass",
+    "assertionFailure": true,
+    "retries": 0,
+    "restoredGreen": true
+  },
+  {
+    "name": "field sampling accepts zero",
+    "sourceDiff": "diff --git a/src/fuzz.ts b/src/fuzz.ts\nindex 6af0f8d..8e9f6a6 100644\n--- a/src/fuzz.ts\n+++ b/src/fuzz.ts\n@@ -76,7 +76,7 @@ export function sampleField(readBytes: (length: number) => Uint8Array, prime: bi\n     bytes[0] &= mask;\n     let value = 0n;\n     for (const byte of bytes) value = (value << 8n) | BigInt(byte);\n-    if (value > 0n && value < prime) return value;\n+    if (value >= 0n && value < prime) return value;\n   }\n }\n \n",
+    "baseline": "d3bde73e1b6bc987ebad4b8c02004f15c9feecd43e32e6b3cb56bab14a544514",
+    "mutant": "5c1f43626aa45aa662846e3a5c5369d8ca049d64dbeac5910754dc09a4e80681",
+    "namedTest": "rejects out-of-range and zero XOF values instead of reducing modulo p",
+    "assertionFailure": true,
+    "retries": 0,
+    "restoredGreen": true
+  },
+  {
+    "name": "a truncated passing sample is allowed to land",
+    "sourceDiff": "diff --git a/src/fuzz.ts b/src/fuzz.ts\nindex 6af0f8d..dea48a8 100644\n--- a/src/fuzz.ts\n+++ b/src/fuzz.ts\n@@ -115,7 +115,7 @@ export function seededFields(bytes: Uint8Array, prime: bigint) {\n }\n \n export function allSamplesPass(samples: readonly SampleResult[], requested: number) {\n-  return samples.length === requested && samples.every(sample => sample.passed);\n+  return samples.every(sample => sample.passed);\n }\n \n export function runFuzzDraw(config: FuzzConfig, nonce: bigint, tests: number, earlyExit = true) {\n",
+    "baseline": "d3bde73e1b6bc987ebad4b8c02004f15c9feecd43e32e6b3cb56bab14a544514",
+    "mutant": "db58d80938081eb0d71efa1b85ad675269caca7f727453997cc9343bccbd6ab0",
+    "namedTest": "requires every requested sample before a draw lands",
+    "assertionFailure": true,
+    "retries": 0,
+    "restoredGreen": true
+  },
+  {
+    "name": "draw-budget inversion uses the wrong logarithm sign",
+    "sourceDiff": "diff --git a/src/fuzz.ts b/src/fuzz.ts\nindex 6af0f8d..3498bb5 100644\n--- a/src/fuzz.ts\n+++ b/src/fuzz.ts\n@@ -42,7 +42,7 @@ export function failureCeiling(tests: number, draws: number, confidence: number)\n   if (!Number.isFinite(confidence) || confidence <= 0 || confidence >= 1) {\n     throw new RangeError('Confidence must be strictly between zero and one.');\n   }\n-  return -Math.expm1((Math.log1p(-confidence) - Math.log(draws)) / tests);\n+  return -Math.expm1((Math.log1p(-confidence) + Math.log(draws)) / tests);\n }\n \n export function estimateFailures(failures: number, samples: number, iterations: readonly number[] = []): FailureEstimate {\n",
+    "baseline": "d3bde73e1b6bc987ebad4b8c02004f15c9feecd43e32e6b3cb56bab14a544514",
+    "mutant": "b3e4c78adcdcd88399c7ed2c3da5cf646e2e4b0c90ae69f6ebf542eee20c92ce",
+    "namedTest": "recomputes the three 99% ceilings and the Google grinding exponent",
+    "assertionFailure": true,
+    "retries": 0,
+    "restoredGreen": true
+  },
+  {
+    "name": "the fuzz worker accepts an arbitrary field modulus",
+    "sourceDiff": "diff --git a/src/fuzz.ts b/src/fuzz.ts\nindex 6af0f8d..c758ba7 100644\n--- a/src/fuzz.ts\n+++ b/src/fuzz.ts\n@@ -14,7 +14,7 @@ function positiveInteger(value: number, label: string) {\n }\n \n export function validateFuzzConfig(config: FuzzConfig) {\n-  if (config.prime !== parameters.fieldPrime && config.prime !== parameters.smallField) {\n+  if (false && config.prime !== parameters.fieldPrime && config.prime !== parameters.smallField) {\n     throw new RangeError('The fuzz demo supports only the secp256k1 and 2^61 - 1 fields.');\n   }\n   if (!Number.isFinite(config.iterationFactor) || config.iterationFactor < -8 || config.iterationFactor > 8) {\n",
+    "baseline": "d3bde73e1b6bc987ebad4b8c02004f15c9feecd43e32e6b3cb56bab14a544514",
+    "mutant": "7124a490defd207ef84c0b662480d89ff7f7ade18e90b32484734cef77437797",
+    "namedTest": "rejects unsupported or out-of-range fuzz configurations before sampling",
+    "assertionFailure": true,
+    "retries": 0,
+    "restoredGreen": true
+  },
+  {
+    "name": "the toy accepts aliased CCX operands by default",
+    "sourceDiff": "diff --git a/src/kickmix-toy.ts b/src/kickmix-toy.ts\nindex ebd46c4..d18b1fb 100644\n--- a/src/kickmix-toy.ts\n+++ b/src/kickmix-toy.ts\n@@ -4,7 +4,7 @@ export function applyToyCCX(state: number, width: number, operands: Operands, ch\n   if (!Number.isInteger(width) || width < 1 || width > 8) throw new RangeError('The toy supports one to eight classical basis bits.');\n   if (!Number.isInteger(state) || state < 0 || state >= 2 ** width) throw new RangeError('State is outside the toy register.');\n   if (operands.some(operand => !Number.isInteger(operand) || operand < 0 || operand >= width)) throw new RangeError('Operand is outside the toy register.');\n-  if (checkAliasing && new Set(operands).size !== 3) throw new RangeError('Rejected: CCX operands must be distinct.');\n+  if (false && checkAliasing && new Set(operands).size !== 3) throw new RangeError('Rejected: CCX operands must be distinct.');\n   const [firstControl, secondControl, target] = operands;\n   const controlsSet = ((state >> firstControl) & 1) === 1 && ((state >> secondControl) & 1) === 1;\n   return controlsSet ? state ^ (1 << target) : state;\n",
+    "baseline": "d3bde73e1b6bc987ebad4b8c02004f15c9feecd43e32e6b3cb56bab14a544514",
+    "mutant": "8543ed0b89efbc1fcf7329105e965d5c707b3eaac233c8f5691f5d3b20040024",
+    "namedTest": "rejects operand aliasing by default",
+    "assertionFailure": true,
+    "retries": 0,
+    "restoredGreen": true
+  },
+  {
+    "name": "the commitment omits the dialog implementation bytes",
+    "sourceDiff": "diff --git a/src/fuzz.ts b/src/fuzz.ts\nindex 6af0f8d..09aad4f 100644\n--- a/src/fuzz.ts\n+++ b/src/fuzz.ts\n@@ -88,7 +88,7 @@ export function committedBytes(config: FuzzConfig) {\n   validateFuzzConfig(config);\n   return new TextEncoder().encode(JSON.stringify({\n     domain: 'Point Ledger classical dialog demo v1',\n-    implementation: dialogSource,\n+    implementation: '',\n     prime: config.prime.toString(16),\n     iterationFactor: config.iterationFactor,\n     paddingFactor: config.paddingFactor,\n",
+    "baseline": "d3bde73e1b6bc987ebad4b8c02004f15c9feecd43e32e6b3cb56bab14a544514",
+    "mutant": "1c866ffcbd73ebcb774b74f2d5e6fb282df07de4cbb3936e8f48bccdbda49a51",
+    "namedTest": "binds the implementation, parameters and nonce; seeds SHAKE with those same bytes",
+    "assertionFailure": true,
+    "retries": 0,
+    "restoredGreen": true
+  }
+]
