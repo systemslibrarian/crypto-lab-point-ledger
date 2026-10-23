@@ -4,5 +4,6 @@ coverage/
 *.tsbuildinfo
 test-results/
 playwright-report/
+mutation-logs/
 .DS_Store
 chat.md

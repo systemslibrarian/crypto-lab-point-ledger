@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { allSamplesPass, committedBytes, demonstrationInput, estimateFailures, failureCeiling, grindingBound, landabilityLog2, nonceBytes, randomField, runFuzzDraw, sampleField, seededFields, type FuzzConfig } from '../src/fuzz';
+import { allSamplesPass, committedBytes, demonstrationInput, estimateFailures, failureCeiling, grindingBound, landabilityLog2, nonceBytes, randomField, runFuzzDraw, sampleField, seededFields, validateFuzzConfig, type FuzzConfig } from '../src/fuzz';
 import { parameters } from '../src/sources';
 
 const config: FuzzConfig = { prime: parameters.fieldPrime, iterationFactor: 2.4, paddingFactor: 2.3 };
@@ -53,6 +53,9 @@ describe('Fuzz evidence and deterministic draws', () => {
 
   it('binds the implementation, parameters and nonce; seeds SHAKE with those same bytes', () => {
     const payload = committedBytes(config);
+    const committed = JSON.parse(new TextDecoder().decode(payload));
+    expect(committed.domain).toBe('Point Ledger classical dialog demo v1');
+    expect(committed.implementation).toContain('export function multiplyDialog');
     const draw = runFuzzDraw(config, 0n, 4, false);
     const seed = Buffer.concat([payload, nonceBytes(0n)]);
     expect(draw.commitment).toBe(createHash('sha256').update(seed).digest('hex'));
@@ -89,10 +92,20 @@ describe('Fuzz evidence and deterministic draws', () => {
     expect(() => runFuzzDraw(config, 0n, 33)).toThrow();
     expect(() => failureCeiling(0, 1, 0.99)).toThrow();
     expect(() => failureCeiling(1, 0, 0.99)).toThrow();
+    expect(() => failureCeiling(1, 1.5, 0.99)).toThrow('positive safe integer');
+    expect(() => failureCeiling(1, Number.MAX_SAFE_INTEGER + 1, 0.99)).toThrow('positive safe integer');
     expect(() => failureCeiling(1, 1, 1)).toThrow();
     expect(() => landabilityLog2(-0.1, 5)).toThrow();
     expect(() => landabilityLog2(NaN, 5)).toThrow();
     expect(() => grindingBound(0.1, 5, 0)).toThrow();
+    expect(() => grindingBound(0.1, 5, 1.5)).toThrow('positive safe integer');
     expect(() => estimateFailures(2, 1)).toThrow();
+  });
+
+  it('rejects unsupported or out-of-range fuzz configurations before sampling', () => {
+    expect(() => validateFuzzConfig({ ...config, prime: 31n })).toThrow('supports only');
+    expect(() => validateFuzzConfig({ ...config, iterationFactor: Infinity })).toThrow('Iteration factor');
+    expect(() => validateFuzzConfig({ ...config, paddingFactor: -1 })).toThrow('Padding factor');
+    expect(() => committedBytes({ ...config, prime: 31n })).toThrow('supports only');
   });
 });
