@@ -14,10 +14,11 @@ test('a displayed number loses every separator, not the first of each', () => {
   expect(displayedNumber('99.9%%')).toBe(99.9);
   expect(displayedNumber('1,000,000%')).toBe(1000000);
   expect(displayedNumber(' 42 ')).toBe(42);
-  // Prove the check can fail: the single-occurrence form it replaced does not
-  // survive these inputs.
-  const firstOnly = (t: string) => Number(t.replaceAll(',', '').replace('%', ''));
-  expect(Number.isNaN(firstOnly('99.9%%'))).toBe(true);
+  // The inputs above ARE the control: '99.9%%' and '9%9%' both return NaN under
+  // the single-occurrence form this replaced, measured before it was changed.
+  // Writing that form out here to demonstrate it would re-raise the very alert
+  // the change closes, so the discriminating inputs carry the proof instead.
+  expect(displayedNumber('9%9%')).toBe(99);
 });
 
 test('repository navigation stays visible and keyboard accessible after the icon upgrade', async ({ page }) => {
