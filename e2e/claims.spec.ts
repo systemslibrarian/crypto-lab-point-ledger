@@ -1,9 +1,25 @@
 import { expect, test, type Page } from '@playwright/test';
-import { boot, finishDialog, openAct, expectNoHorizontalOverflow } from './gate';
+import { boot, displayedNumber, finishDialog, openAct, expectNoHorizontalOverflow } from './gate';
 
-const numberOnPage = async (page: Page, id: string) => Number((await page.getByTestId(id).innerText()).replaceAll(',', '').replace('%', ''));
+const numberOnPage = async (page: Page, id: string) => displayedNumber(await page.getByTestId(id).innerText());
 
 test.beforeEach(async ({ page }) => { await boot(page); });
+
+test('a displayed number loses every separator, not the first of each', () => {
+  // `.replace(',', '')` and `.replace('%', '')` each substitute ONE occurrence.
+  // With two of either, Number() returns NaN and the failure lands on whatever
+  // assertion consumed it rather than on the parse.
+  expect(displayedNumber('1,234,567')).toBe(1234567);
+  expect(displayedNumber('12%')).toBe(12);
+  expect(displayedNumber('99.9%%')).toBe(99.9);
+  expect(displayedNumber('1,000,000%')).toBe(1000000);
+  expect(displayedNumber(' 42 ')).toBe(42);
+  // The inputs above ARE the control: '99.9%%' and '9%9%' both return NaN under
+  // the single-occurrence form this replaced, measured before it was changed.
+  // Writing that form out here to demonstrate it would re-raise the very alert
+  // the change closes, so the discriminating inputs carry the proof instead.
+  expect(displayedNumber('9%9%')).toBe(99);
+});
 
 test('repository navigation stays visible and keyboard accessible after the icon upgrade', async ({ page }) => {
   const navigation = page.getByRole('navigation', { name: 'Crypto Lab navigation' });
@@ -120,6 +136,14 @@ test('ceiling: no point for unknown G; independent inversion checks known budget
   await page.getByLabel('The number of draws is unknown').check();
   await expect(page.getByTestId('ceiling-result')).toHaveCount(0);
   await expect(page.getByTestId('unknown-ceiling')).toContainText('no single certified ceiling');
+});
+
+test('ceiling: a draw count is an integer contract, not a fractional weight', async ({ page }) => {
+  await openAct(page, 2);
+  await page.getByLabel('The number of draws is unknown').uncheck();
+  await page.getByLabel('Draw bound G', { exact: true }).fill('1.5');
+  await expect(page.getByTestId('ceiling-result')).toHaveCount(0);
+  await expect(page.getByRole('status')).toContainText('positive integer');
 });
 
 test('grind: selected checks pass while all-input correctness remains unproved', async ({ page }) => {

@@ -13,6 +13,18 @@ function positiveInteger(value: number, label: string) {
   if (!Number.isSafeInteger(value) || value < 1) throw new RangeError(`${label} must be a positive safe integer.`);
 }
 
+export function validateFuzzConfig(config: FuzzConfig) {
+  if (config.prime !== parameters.fieldPrime && config.prime !== parameters.smallField) {
+    throw new RangeError('The fuzz demo supports only the secp256k1 and 2^61 - 1 fields.');
+  }
+  if (!Number.isFinite(config.iterationFactor) || config.iterationFactor < -8 || config.iterationFactor > 8) {
+    throw new RangeError('Iteration factor must be between -8 and 8.');
+  }
+  if (!Number.isFinite(config.paddingFactor) || config.paddingFactor < 0 || config.paddingFactor > 8) {
+    throw new RangeError('Padding factor must be between 0 and 8.');
+  }
+}
+
 export function landabilityLog2(failureRate: number, tests: number) {
   positiveInteger(tests, 'Test count');
   if (!Number.isFinite(failureRate) || failureRate < 0 || failureRate > 1) throw new RangeError('Failure rate must be in [0, 1].');
@@ -20,14 +32,15 @@ export function landabilityLog2(failureRate: number, tests: number) {
 }
 
 export function grindingBound(failureRate: number, tests: number, draws: number) {
-  if (!Number.isFinite(draws) || draws < 1) throw new RangeError('Draw bound must be at least one.');
+  positiveInteger(draws, 'Draw bound');
   return Math.min(1, 2 ** (Math.log2(draws) + landabilityLog2(failureRate, tests)));
 }
 
 export function failureCeiling(tests: number, draws: number, confidence: number) {
   positiveInteger(tests, 'Test count');
-  if (!Number.isFinite(draws) || draws < 1 || !Number.isFinite(confidence) || confidence <= 0 || confidence >= 1) {
-    throw new RangeError('Draws must be at least one; confidence must be strictly between zero and one.');
+  positiveInteger(draws, 'Draw bound');
+  if (!Number.isFinite(confidence) || confidence <= 0 || confidence >= 1) {
+    throw new RangeError('Confidence must be strictly between zero and one.');
   }
   return -Math.expm1((Math.log1p(-confidence) - Math.log(draws)) / tests);
 }
@@ -72,6 +85,7 @@ export function randomField(prime: bigint) {
 }
 
 export function committedBytes(config: FuzzConfig) {
+  validateFuzzConfig(config);
   return new TextEncoder().encode(JSON.stringify({
     domain: 'Point Ledger classical dialog demo v1',
     implementation: dialogSource,

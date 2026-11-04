@@ -49,6 +49,8 @@ describe('Google claims, including clock erratum 2.1', () => {
     expect(() => attackResources(1, NaN)).toThrow(RangeError);
     expect(() => onSpendProbability(-1, 10)).toThrow(RangeError);
     expect(() => onSpendProbability(9, 0)).toThrow(RangeError);
+    expect(() => clockMinutes(-1)).toThrow(RangeError);
+    expect(() => clockMinutes(Number.POSITIVE_INFINITY)).toThrow(RangeError);
   });
 
   it('recomputes the ECDSA.Fail products, retry proxy and paper-baseline reduction', () => {
