@@ -1,9 +1,24 @@
 import { expect, test, type Page } from '@playwright/test';
-import { boot, finishDialog, openAct, expectNoHorizontalOverflow } from './gate';
+import { boot, displayedNumber, finishDialog, openAct, expectNoHorizontalOverflow } from './gate';
 
-const numberOnPage = async (page: Page, id: string) => Number((await page.getByTestId(id).innerText()).replaceAll(',', '').replace('%', ''));
+const numberOnPage = async (page: Page, id: string) => displayedNumber(await page.getByTestId(id).innerText());
 
 test.beforeEach(async ({ page }) => { await boot(page); });
+
+test('a displayed number loses every separator, not the first of each', () => {
+  // `.replace(',', '')` and `.replace('%', '')` each substitute ONE occurrence.
+  // With two of either, Number() returns NaN and the failure lands on whatever
+  // assertion consumed it rather than on the parse.
+  expect(displayedNumber('1,234,567')).toBe(1234567);
+  expect(displayedNumber('12%')).toBe(12);
+  expect(displayedNumber('99.9%%')).toBe(99.9);
+  expect(displayedNumber('1,000,000%')).toBe(1000000);
+  expect(displayedNumber(' 42 ')).toBe(42);
+  // Prove the check can fail: the single-occurrence form it replaced does not
+  // survive these inputs.
+  const firstOnly = (t: string) => Number(t.replaceAll(',', '').replace('%', ''));
+  expect(Number.isNaN(firstOnly('99.9%%'))).toBe(true);
+});
 
 test('repository navigation stays visible and keyboard accessible after the icon upgrade', async ({ page }) => {
   const navigation = page.getByRole('navigation', { name: 'Crypto Lab navigation' });

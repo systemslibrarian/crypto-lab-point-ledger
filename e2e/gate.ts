@@ -396,3 +396,16 @@ export async function scan(page: Page, label: string): Promise<void> {
     await soft(() => expectNoInvisibleFocusTargets(page, label));
     await soft(() => expectNoHorizontalOverflow(page, label));
 }
+
+/**
+ * The number a panel displays, as a number.
+ *
+ * Every separator must go, not the first of each. This was
+ * `.replaceAll(',', '').replace('%', '')` — the inconsistency CodeQL reports as
+ * js/incomplete-sanitization, because `.replace` with a string pattern
+ * substitutes one occurrence. A second `%` survived, `Number()` returned NaN,
+ * and the assertion that followed failed somewhere else entirely.
+ */
+export function displayedNumber(text: string): number {
+  return Number(text.replaceAll(',', '').replaceAll('%', '').trim());
+}
