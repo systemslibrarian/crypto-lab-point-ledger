@@ -78,7 +78,7 @@ export const references = {
     status: 'Brief: read in full. Build read sections 1-5, all algorithms and tables; inspected Fig. 1 SVG.',
   },
   ecdsa: {
-    label: 'Long et al. / ECDSA.Fail', title: 'ECDSA.Fail: Open Autoresearch for Quantum Cryptanalysis',
+    label: 'Long et al. / ECDSA.Fail', title: "ECDSA.Fail: Open Autoresearch for Optimizing Elliptic-Curve Point Addition in Shor's Algorithm",
     url: 'https://arxiv.org/abs/2609.09582v1', locator: '2609.09582v1; 3.3, 5.1-5.2, Table 3, 6', kind: 'primary',
     status: 'Brief: abstract, 1-2 and 3.3 excerpt read; 3.3 in full, 4-6 and supplements not read. Build additionally read 3.3 and 6 in full, 5.1 and Table 3; not the full remaining paper.',
   },
