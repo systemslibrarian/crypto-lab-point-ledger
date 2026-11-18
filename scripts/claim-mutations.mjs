@@ -136,6 +136,7 @@ if (dirty.status !== 0) {
 pass(build, 'baseline build');
 const baseline = distHash();
 const evidence = [];
+const digests = [];
 console.log('baseline: unmutated copy PASSES');
 mkdirSync('mutation-logs', { recursive: true });
 
@@ -172,15 +173,26 @@ for (const [name, file, before, after, owner] of cases) {
       throw new Error(name + ': no assertion kill\n' + output);
     }
 
+    /* The CLAIM goes in the committed evidence; the DIGESTS do not.
+     *
+     * `baseline` and `mutant` are sha256 of dist/, and this build is not
+     * byte-reproducible, so committing them made `npm run test:mutations`
+     * rewrite a tracked file on every run: the gate left the tree dirty, which
+     * is both noise in every diff and a trap for the clean-tree guard at the
+     * top of this script. What the evidence needs to assert is that the
+     * mutation reached the shipped artifact, and that is `mutant !== baseline`
+     * -- already thrown on above, and recorded here as a fact that does not
+     * change between runs. The digests themselves go to test-results/, which
+     * is gitignored, for anyone who wants to read the actual values. */
     evidence.push({
       name,
       sourceDiff,
-      baseline,
-      mutant,
+      artifactMoved: mutant !== baseline,
       namedTest: owner[1][owner[1].indexOf('--testNamePattern') + 1],
       assertionFailure: true,
       retries: 0,
     });
+    digests.push({ name, baseline, mutant });
   } finally {
     writeFileSync(file, original);
     restoredBuild = run(build);
@@ -192,12 +204,17 @@ for (const [name, file, before, after, owner] of cases) {
     throw new Error(name + ': restore build failed\n' + restoredBuild.stdout + '\n' + restoredBuild.stderr);
   }
   if (restoredHash !== baseline) throw new Error(name + ': restored artifact hash differs');
+  digests.at(-1).restoredToBaseline = true;
   if (restoredOwner.status !== 0) {
     throw new Error(name + ': restored owner failed\n' + restoredOwner.stdout + '\n' + restoredOwner.stderr);
   }
   evidence.at(-1).restoredGreen = true;
+  evidence.at(-1).artifactRestored = true;
   console.log(name + ': killed; exact artifact restored; owning test green');
 }
 
 writeFileSync('mutation-evidence.json', JSON.stringify(evidence, null, 2) + '\n');
+/* The volatile half, beside the gate's other artifacts rather than in git. */
+mkdirSync('test-results', { recursive: true });
+writeFileSync('test-results/mutation-digests.json', JSON.stringify(digests, null, 2) + '\n');
 console.log('all ' + cases.length + ' mutation(s) caught');
