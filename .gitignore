@@ -7,3 +7,7 @@ playwright-report/
 mutation-logs/
 .DS_Store
 chat.md
+
+# The build standard lives in the catalog repo (audits/_MASTER-TEMPLATE.md).
+# A committed snapshot of it ages silently into a second, wrong account of the standard.
+_MASTER-TEMPLATE.md
