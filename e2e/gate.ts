@@ -4,6 +4,7 @@ import { auditContrast, formatContrastFailures } from './contrast';
 import { auditControlNames, formatControlNameFailures } from './control-names';
 import { auditNonText } from './nontext';
 import { NONTEXT_BASELINE } from './nontext-baseline';
+import { assertThisLab } from './identity';
 export const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 export const NARROW = { width: 380, height: 800 };
 export async function settle(page: Page, budgetMs = 4000): Promise<void> {
@@ -236,7 +237,9 @@ export async function boot(page: Page): Promise<void> {
     page.setDefaultTimeout(20000);
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.addInitScript(() => localStorage.setItem('theme', 'light'));
-    await page.goto('.');
+    /* Not page.goto: a suite that navigates and starts asserting cannot
+     * tell this lab's server from anyone else's. See e2e/identity.ts. */
+    await assertThisLab(page, '.');
     await expect(page.getByRole('heading', { name: 'Point Ledger', exact: true })).toBeVisible();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     expect(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
