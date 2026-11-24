@@ -5,6 +5,14 @@ import { derivations, references, type SourceKey } from '../sources';
 export const integer = (value: number) => value.toLocaleString('en-US', { maximumFractionDigits: 0 });
 export const percent = (value: number, digits = 3) => `${(value * 100).toFixed(digits)}%`;
 
+// A finite clean sample always has a positive upper limit. Displaying an
+// inequality requires rounding its right-hand side toward the larger value.
+export function upperBoundPercent(probability: number) {
+  const places = 1_000_000;
+  const units = Math.max(1, Math.ceil(probability * 100 * places));
+  return `${(units / places).toFixed(6)}%`;
+}
+
 export function Cite({ source, locator }: { source: SourceKey; locator?: string }) {
   const citation = references[source];
   return <a className="citation" href={citation.url} target="_blank" rel="noreferrer" title={locator ?? citation.locator}>{citation.label} <span>{locator ?? citation.locator}</span><ExternalLink size={12} aria-hidden="true" /></a>;

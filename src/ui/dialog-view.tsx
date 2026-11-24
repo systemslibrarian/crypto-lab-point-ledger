@@ -3,11 +3,11 @@ import { ArrowRight, ChevronLeft, ChevronRight, FlaskConical, Play, RotateCcw, S
 import { bitLength, encodeTriplet, multiplyDialog, parseInteger, pseudoMersenneReduce } from '../dialog';
 import { demonstrationInput, randomField, type FailureEstimate } from '../fuzz';
 import { labDefaults, parameters } from '../sources';
-import { Cite, Derivation, integer, percent, SectionTitle, Status } from './shared';
+import { Cite, Derivation, integer, percent, SectionTitle, Status, upperBoundPercent } from './shared';
 import { useLabWorker } from './use-lab-worker';
 
 export function FailureSummary({ estimate }: { estimate: FailureEstimate }) {
-  return <div className="measurement-results" data-testid="failure-estimate"><div><span className="eyebrow">Observed failures</span><strong>{integer(estimate.failures)} / {integer(estimate.samples)}</strong></div><div><span className="eyebrow">{estimate.failures === 0 ? '95% upper bound / 3/N' : 'Measured failure rate'}</span><strong>{estimate.failures === 0 ? `<= ${percent(estimate.upper, 3)}` : percent(estimate.rate, 3)}</strong></div><p className="small muted">{estimate.failures === 0 ? 'No failures observed is not evidence of zero failure probability. Rule-of-three approximation, capped at 100%.' : `Wilson 95% interval: ${percent(estimate.lower)} to ${percent(estimate.upper)}.`}</p></div>;
+  return <div className="measurement-results" data-testid="failure-estimate"><div><span className="eyebrow">Observed failures</span><strong>{integer(estimate.failures)} / {integer(estimate.samples)}</strong></div><div><span className="eyebrow">{estimate.failures === 0 ? '95% upper bound / 3/N' : 'Measured failure rate'}</span><strong>{estimate.failures === 0 ? `<= ${upperBoundPercent(estimate.upper)}` : percent(estimate.rate, 3)}</strong></div><p className="small muted">{estimate.failures === 0 ? 'No failures observed is not evidence of zero failure probability. Rule-of-three approximation, capped at 100%.' : `Wilson 95% interval: ${percent(estimate.lower)} to ${percent(estimate.upper)}.`}</p></div>;
 }
 
 function Register({ label, value, capacity, totalBits }: { label: string; value: bigint; capacity: number; totalBits: number }) {

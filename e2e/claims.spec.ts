@@ -138,6 +138,17 @@ test('ceiling: no point for unknown G; independent inversion checks known budget
   await expect(page.getByTestId('unknown-ceiling')).toContainText('no single certified ceiling');
 });
 
+test('ceiling: finite clean samples retain a positive upper limit in every readout', async ({ page }) => {
+  await openAct(page, 2);
+  await page.getByLabel('The number of draws is unknown').uncheck();
+  await page.getByLabel('Ceiling test count').fill('1000000');
+  await page.getByLabel('Confidence percent').fill('10');
+  // 100 * (1 - 0.9^(1/1,000,000)) = 0.000010536051... percent.
+  await expect(page.getByTestId('ceiling-value')).toHaveText('0.000011%');
+  await expect(page.locator('.ceiling-references strong').first()).toHaveText('0.000011%');
+  await expect(page.locator('.formula').filter({ hasText: 'epsilon* ≤ 0.000011%' })).toHaveCount(2);
+});
+
 test('ceiling: a draw count is an integer contract, not a fractional weight', async ({ page }) => {
   await openAct(page, 2);
   await page.getByLabel('The number of draws is unknown').uncheck();
